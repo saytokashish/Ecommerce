@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class ProductClient {
     private final RestTemplate restTemplate = new RestTemplate();
-    public boolean productExists(Long productId) {
+    public boolean productExists(String productId) {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(
                 "http://product-service:8083/api/products/" + productId, String.class);
@@ -17,7 +17,7 @@ public class ProductClient {
             return false;
         }
     }
-    public ProductDTO getProductById(Long productId) {
+    public ProductDTO getProductById(String productId) {
         try {
             ResponseEntity<ProductClient.ProductDTO> response = restTemplate.getForEntity(
                 "http://product-service:8083/api/products/" + productId, ProductDTO.class);
@@ -30,18 +30,18 @@ public class ProductClient {
         return null;
     }
 
-    public void decreaseProductQuantity(Long productId, int amount) {
+    public void decreaseProductQuantity(String productId, int amount) {
         String url = "http://product-service:8083/api/products/" + productId + "/decrease-quantity?amount=" + amount;
         restTemplate.patchForObject(url, null, String.class);
     }
 
-    public void adjustProductQuantity(Long productId, int oldQty, int newQty) {
+    public void adjustProductQuantity(String productId, int oldQty, int newQty) {
         String url = "http://product-service:8083/api/products/" + productId + "/adjust-quantity?oldQty=" + oldQty + "&newQty=" + newQty;
         restTemplate.patchForObject(url, null, String.class);
     }
     @Data
     public static class ProductDTO {
-        private Long id;
+        private String id;
         private String name;
         private String description;
         private double price;
