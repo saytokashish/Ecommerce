@@ -73,7 +73,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/decrease-quantity")
-    public ResponseEntity<?> decreaseProductQuantity(@PathVariable("id") String id, @RequestParam int amount) {
+    public ResponseEntity<?> decreaseProductQuantity(@PathVariable("id") String id, @RequestParam(name = "amount") int amount) {
         try {
             productService.decreaseProductQuantity(id, amount);
             return ResponseEntity.ok("Product quantity decreased successfully");
@@ -83,7 +83,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/adjust-quantity")
-    public ResponseEntity<?> adjustProductQuantity(@PathVariable("id") String id, @RequestParam int oldQty, @RequestParam int newQty) {
+    public ResponseEntity<?> adjustProductQuantity(@PathVariable("id") String id, @RequestParam(name = "oldQty") int oldQty, @RequestParam(name = "newQty") int newQty) {
         try {
             productService.adjustProductQuantity(id, oldQty, newQty);
             return ResponseEntity.ok("Product quantity adjusted successfully");
