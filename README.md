@@ -35,17 +35,20 @@ This project demonstrates a simple microservices-based architecture using Java, 
 
 ## API Documentation
 Each service exposes Swagger UI:
-- User Service: http://localhost:8081/swagger-ui.html
-- Order Service: http://localhost:8082/swagger-ui.html
-- Product Service: http://localhost:8083/swagger-ui.html
+- User Service: http://localhost:8081/swagger-ui/index.html
+- Order Service: http://localhost:8082/swagger-ui/index.html
+- Product Service: http://localhost:8083/swagger-ui/index.html
 
 ## Health Checks
 Each service exposes a health endpoint:
-- `/actuator/health`
+- http://localhost:8083/actuator/health
+- http://localhost:8083/actuator/info
+- http://localhost:8083/actuator/metrics
 
 ## Testing
-You can use Postman or curl to test the endpoints. Example requests are provided in each service's README.
+You can use Swagger-UI to test the endpoints.
 
 ---
-
-For detailed service-specific instructions, see the README in each service module.
+## In Short 
+1. In root directory run docker-compose up -d 
+2. Test the Swagger-UI
