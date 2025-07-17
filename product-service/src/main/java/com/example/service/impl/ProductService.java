@@ -35,6 +35,7 @@ public class ProductService implements IProductService {
     public void createProduct(ProductDTO productDTO) throws Exception {
         Product product = toEntity(productDTO);
         product.setId(null);
+        product.setQuantity(productDTO.getQuantity());
         productRepository.save(product);
     }
     public void updateProduct(String id, ProductDTO productDTO) throws Exception {
@@ -43,10 +44,28 @@ public class ProductService implements IProductService {
         existing.setName(productDTO.getName());
         existing.setDescription(productDTO.getDescription());
         existing.setPrice(productDTO.getPrice());
+        existing.setQuantity(productDTO.getQuantity());
         productRepository.save(existing);
     }
     public void deleteProduct(String id) throws Exception {
         if (!productRepository.existsById(id)) throw new Exception("Product does not exist with id: " + id);
         productRepository.deleteById(id);
+    }
+
+    public void decreaseProductQuantity(String id, int amount) throws Exception {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null) throw new Exception("Product does not exist with id: " + id);
+        if (product.getQuantity() < amount) throw new Exception("Insufficient product quantity.");
+        product.setQuantity(product.getQuantity() - amount);
+        productRepository.save(product);
+    }
+
+    public void adjustProductQuantity(String id, int oldQty, int newQty) throws Exception {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null) throw new Exception("Product does not exist with id: " + id);
+        int diff = newQty - oldQty;
+        if (product.getQuantity() < diff) throw new Exception("Insufficient product quantity for update.");
+        product.setQuantity(product.getQuantity() - diff);
+        productRepository.save(product);
     }
 } 

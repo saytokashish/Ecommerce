@@ -71,4 +71,24 @@ public class ProductController {
             return ResponseEntity.status(500).body("Failed to delete product: " + e.getMessage());
         }
     }
+
+    @PatchMapping("/{id}/decrease-quantity")
+    public ResponseEntity<?> decreaseProductQuantity(@PathVariable("id") String id, @RequestParam int amount) {
+        try {
+            productService.decreaseProductQuantity(id, amount);
+            return ResponseEntity.ok("Product quantity decreased successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/{id}/adjust-quantity")
+    public ResponseEntity<?> adjustProductQuantity(@PathVariable("id") String id, @RequestParam int oldQty, @RequestParam int newQty) {
+        try {
+            productService.adjustProductQuantity(id, oldQty, newQty);
+            return ResponseEntity.ok("Product quantity adjusted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
 } 
