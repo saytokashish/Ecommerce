@@ -50,5 +50,5 @@ You can use Swagger-UI to test the endpoints.
 
 ---
 ## In Short 
-1. In root directory run docker-compose up -d 
+1. In root directory run docker-compose up --build
 2. Test the Swagger-UI
