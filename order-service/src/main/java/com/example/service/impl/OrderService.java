@@ -9,9 +9,11 @@ import com.example.client.ProductClient;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class OrderService implements IOrderService {
     @Autowired
@@ -31,25 +33,35 @@ public class OrderService implements IOrderService {
     }
 
     public List<OrderDTO> getAllOrders() {
+        log.info("Fetching all orders");
         return orderRepository.findAll().stream().map(this::toDTO).toList();
     }
     public OrderDTO getOrderById(Long id) throws Exception {
+        log.info("Fetching order by id: {}", id);
         Order order = orderRepository.findById(id).orElse(null);
-        if (order == null) throw new Exception("Order does not exist with id: " + id);
+        if (order == null) {
+            log.warn("Order does not exist with id: {}", id);
+            throw new Exception("Order does not exist with id: " + id);
+        }
         return toDTO(order);
     }
     public void createOrder(OrderDTO orderDTO) throws Exception {
+        log.info("Creating order: {}", orderDTO);
         if (!userClient.userExists(orderDTO.getUserId())) {
+            log.warn("User does not exist with id: {}", orderDTO.getUserId());
             throw new Exception("User does not exist with id: " + orderDTO.getUserId());
         }
         if (!productClient.productExists(orderDTO.getProductId())) {
+            log.warn("Product does not exist with id: {}", orderDTO.getProductId());
             throw new Exception("Product does not exist with id: " + orderDTO.getProductId());
         }
         ProductClient.ProductDTO product = productClient.getProductById(orderDTO.getProductId());
         if (product == null) {
+            log.error("Failed to fetch product details for id: {}", orderDTO.getProductId());
             throw new Exception("Failed to fetch product details for id: " + orderDTO.getProductId());
         }
         if (orderDTO.getQuantity() > product.getQuantity()) {
+            log.warn("Requested quantity {} exceeds available product quantity {} for product id: {}", orderDTO.getQuantity(), product.getQuantity(), orderDTO.getProductId());
             throw new Exception("Requested quantity exceeds available product quantity.");
         }
         Order order = toEntity(orderDTO);
@@ -58,24 +70,34 @@ public class OrderService implements IOrderService {
         try {
             productClient.decreaseProductQuantity(orderDTO.getProductId(), orderDTO.getQuantity());
         } catch (Exception e) {
+            log.error("Failed to decrease product quantity for product id: {}, rolling back order creation", orderDTO.getProductId(), e);
             orderRepository.delete(order);
             throw new Exception("Failed to decrease product quantity, order creation rolled back.", e);
         }
+        log.info("Order created successfully: {}", order);
     }
     public void updateOrder(Long id, OrderDTO orderDTO) throws Exception {
+        log.info("Updating order with id: {} and data: {}", id, orderDTO);
         Order existing = orderRepository.findById(id).orElse(null);
-        if (existing == null) throw new Exception("Order does not exist with id: " + id);
+        if (existing == null) {
+            log.warn("Order does not exist with id: {}", id);
+            throw new Exception("Order does not exist with id: " + id);
+        }
         if (!userClient.userExists(orderDTO.getUserId())) {
+            log.warn("User does not exist with id: {}", orderDTO.getUserId());
             throw new Exception("User does not exist with id: " + orderDTO.getUserId());
         }
         if (!productClient.productExists(orderDTO.getProductId())) {
+            log.warn("Product does not exist with id: {}", orderDTO.getProductId());
             throw new Exception("Product does not exist with id: " + orderDTO.getProductId());
         }
         ProductClient.ProductDTO product = productClient.getProductById(orderDTO.getProductId());
         if (product == null) {
+            log.error("Failed to fetch product details for id: {}", orderDTO.getProductId());
             throw new Exception("Failed to fetch product details for id: " + orderDTO.getProductId());
         }
         if (orderDTO.getQuantity() > product.getQuantity()) {
+            log.warn("Requested quantity {} exceeds available product quantity {} for product id: {}", orderDTO.getQuantity(), product.getQuantity(), orderDTO.getProductId());
             throw new Exception("Requested quantity exceeds available product quantity.");
         }
         // Save a copy of the old state for rollback
@@ -93,13 +115,20 @@ public class OrderService implements IOrderService {
         try {
             productClient.adjustProductQuantity(orderDTO.getProductId(), oldOrder.getQuantity(), orderDTO.getQuantity());
         } catch (Exception e) {
+            log.error("Failed to adjust product quantity for product id: {}, rolling back order update", orderDTO.getProductId(), e);
             // Rollback to old order state
             orderRepository.save(oldOrder);
             throw new Exception("Failed to adjust product quantity, order update rolled back.", e);
         }
+        log.info("Order updated successfully: {}", existing);
     }
     public void deleteOrder(Long id) throws Exception {
-        if (!orderRepository.existsById(id)) throw new Exception("Order does not exist with id: " + id);
+        log.info("Deleting order with id: {}", id);
+        if (!orderRepository.existsById(id)) {
+            log.warn("Order does not exist with id: {}", id);
+            throw new Exception("Order does not exist with id: " + id);
+        }
         orderRepository.deleteById(id);
+        log.info("Order deleted successfully with id: {}", id);
     }
 } 
